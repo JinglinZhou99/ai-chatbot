@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chatbot Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .home-container {
+            max-width: 500px; margin: 100px auto; padding: 30px;
+            background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .home-container input {
+            width: 80%; padding: 10px; margin: 20px 0; border: 1px solid #ccc; border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="home-container">
+        <h1>Welcome to the AI Research Chatbot</h1>
+        <div>
+            <p>This is a research prototype powered by OpenAI. Please enter your assigned Participant ID to begin your session. Your interactions and usage will be logged for study purposes.</p>
+        </div>
+        <input type="text" id="participant-id" placeholder="Enter Participant ID">
+        <br>
+        <button id="start-btn" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer;">Start Chat</button>
+    </div>
+
+    <script>
+        document.getElementById('start-btn').addEventListener('click', () => {
+            const pid = document.getElementById('participant-id').value.trim();
+            if (pid) {
+                localStorage.setItem('participantID', pid);
+                window.location.href = 'chat.html';
+            } else {
+                alert("Please enter a Participant ID");
+            }
+        });
+    </script>
+</body>
+</html>
