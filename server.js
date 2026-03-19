@@ -41,7 +41,7 @@ app.post('/chat', async (req, res) => {
     try {
         // 1. OpenAI API
         const completion = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo", // 或者使用 gpt-4
+            model: "gpt-3.5-turbo",
             messages: [{ role: "user", content: message }],
         });
 
