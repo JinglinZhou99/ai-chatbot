@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Workflow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .workflow-container {
+            max-width: 600px; margin: 80px auto; padding: 30px;
+            background: #fff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .workflow-btn {
+            display: block; width: 100%; padding: 15px; margin-bottom: 15px;
+            background-color: #3b82f6; color: white; border: none; border-radius: 6px;
+            font-size: 16px; cursor: pointer; text-align: left;
+        }
+        .workflow-btn:hover { background-color: #2563eb; }
+        ol { list-style-type: none; padding: 0; }
+    </style>
+</head>
+<body>
+    <div class="workflow-container">
+        <h1>Study Workflow</h1>
+        <p>Please complete the following steps in order.</p>
+
+        <ol id="workflow-list">
+            <li>
+                <button id="survey-btn" class="workflow-btn" type="button">
+                    1. Complete the demographics questionnaire.
+                </button>
+            </li>
+            <li>
+                <button id="task-btn" class="workflow-btn" type="button">
+                    2. Read the task.
+                </button>
+            </li>
+            <li>
+                <button id="prototype-btn" class="workflow-btn" type="button">
+                    3. Use the AI system to complete the task.
+                </button>
+            </li>
+        </ol>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

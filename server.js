@@ -139,6 +139,17 @@ app.post('/chat', async (req, res) => {
     }
 });
 
+// --- Qualtrics Survey Redirect ---
+app.post('/redirect-to-survey', (req, res) => {
+    const { participantID } = req.body;
+
+    const qualtricsBaseUrl = 'https://qualtricsxmxjnf7f797.qualtrics.com/jfe/form/SV_6XWSTPN572uWFEO';
+
+    const surveyUrl = `${qualtricsBaseUrl}?participantID=${encodeURIComponent(participantID)}`;
+
+    res.send(surveyUrl);
+});
+
 // --- History (Return ONLY last 5) ---
 app.post('/history', async (req, res) => {
     const { participantID } = req.body;

@@ -1,26 +1,315 @@
+// const inputField = document.getElementById('user-input');
+// const sendBtn = document.getElementById('send-btn');
+// const messagesContainer = document.getElementById('messages');
+// const retrievalMethodDropdown = document.getElementById('retrieval-method');
+
+// // 1. Get Participant ID and System ID from URL (Fallback to localStorage)
+// const urlParams = new URLSearchParams(window.location.search);
+// let participantID = urlParams.get('participantID') || localStorage.getItem('participantID');
+// let systemID = urlParams.get('systemID');
+
+// if (!participantID) {
+//     alert("No Participant ID found. Redirecting to home page.");
+//     window.location.href = '/';
+// }
+// if (!systemID && participantID) {
+//     systemID = parseInt(participantID) % 2 === 1 ? 1 : 2; // Calculate if missing
+// }
+
+// // 2. Global variable to store the last N conversation turns
+// let conversationHistory = [];
+// const HISTORY_LIMIT = 5; // Store last 5 interactions
+
+// // Update UI to show which system is active
+// window.addEventListener('DOMContentLoaded', () => {
+//     const chatTitle = document.querySelector('#chat-container h2');
+//     if (chatTitle) {
+//         chatTitle.textContent = `AI Chat (System ${systemID})`;
+//     }
+// });
+
+// async function loadDocuments() {
+//     try {
+//         const res = await fetch('/documents');
+//         const docs = await res.json();
+//         const docsContainer = document.getElementById('uploaded-docs');
+        
+//         if (docs.length === 0) {
+//             docsContainer.innerHTML = '<p class="empty-state">No documents uploaded yet</p>';
+//             return;
+//         }
+        
+//         docsContainer.innerHTML = docs.map(doc => 
+//             `<div style="margin-bottom: 5px; font-size: 14px;">
+//                 📄 <strong>${doc.filename}</strong> <span style="color: green; font-size: 12px;">(${doc.processingStatus})</span>
+//             </div>`
+//         ).join('');
+//     } catch (err) {
+//         console.error("Failed to load documents", err);
+//     }
+// }
+
+// // 3. Load Conversation History (Only the last N)
+// async function loadConversationHistory() {
+//     try {
+//         const response = await fetch('/history', {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' },
+//             body: JSON.stringify({ participantID })
+//         });
+//         const history = await response.json();
+        
+//         history.forEach(interaction => {
+//             appendMessage(interaction.userInput, 'user-msg-bubble');
+            
+//             let botContent = `Bot: "${interaction.botResponse}"`;
+//             if (interaction.retrievedEvidence && interaction.retrievedEvidence.length > 0) {
+//                 const evidenceHtml = interaction.retrievedEvidence.map((e, idx) => 
+//                     `<div style="font-size: 11px; background: #e5e7eb; padding: 4px; margin-top: 4px; border-radius: 4px;">
+//                         <strong>[E${idx + 1}]</strong> ${e.chunkText.substring(0, 80)}... <em>(Score: ${e.relevanceScore.toFixed(2)})</em>
+//                     </div>`
+//                 ).join('');
+                
+//                 let confidenceHtml = '';
+//                 if (interaction.confidence) {
+//                     confidenceHtml = `<div style="font-size: 11px; color: #6b7280; margin-top: 5px;">
+//                         System Confidence: ${(interaction.confidence.overallConfidence * 100).toFixed(1)}% | Method: ${interaction.retrievalMethod}
+//                     </div>`;
+//                 }
+                
+//                 botContent = `<div>Bot: "${interaction.botResponse}"</div><hr style="margin: 8px 0; border-top: 1px solid #d1d5db;">` + evidenceHtml + confidenceHtml;
+//             }
+            
+//             appendHtmlMessage(botContent, 'bot-msg-bubble');
+
+//             // Add to client-side history memory
+//             conversationHistory.push({ role: "user", content: interaction.userInput });
+//             conversationHistory.push({ role: "assistant", content: interaction.botResponse });
+//         });
+
+//         // Ensure we only keep the last N*2 messages (user + assistant per interaction)
+//         if (conversationHistory.length > HISTORY_LIMIT * 2) {
+//             conversationHistory = conversationHistory.slice(-(HISTORY_LIMIT * 2));
+//         }
+
+//     } catch (error) {
+//         console.error("Failed to load history:", error);
+//     }
+// }
+
+// window.addEventListener('DOMContentLoaded', () => {
+//     loadDocuments(); 
+//     loadConversationHistory();
+// });
+
+// function appendMessage(text, className) {
+//     const msgElement = document.createElement('div');
+//     msgElement.textContent = text;
+//     msgElement.classList.add(className);
+//     messagesContainer.appendChild(msgElement);
+//     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+// }
+
+// function appendHtmlMessage(htmlContent, className) {
+//     const msgElement = document.createElement('div');
+//     msgElement.innerHTML = htmlContent;
+//     msgElement.classList.add(className);
+//     messagesContainer.appendChild(msgElement);
+//     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+// }
+
+// document.getElementById('upload-btn').addEventListener('click', async () => {
+//     const fileInput = document.getElementById('file-input');
+//     if (fileInput.files.length === 0) {
+//         alert("Please select a file first!");
+//         return;
+//     }
+
+//     const formData = new FormData();
+//     formData.append('file', fileInput.files[0]);
+
+//     const btn = document.getElementById('upload-btn');
+//     btn.textContent = "Uploading...";
+//     btn.disabled = true;
+
+//     try {
+//         const response = await fetch('/upload-document', {
+//             method: 'POST',
+//             body: formData
+//         });
+        
+//         if (response.ok) {
+//             alert("Document uploaded and indexed successfully!");
+//             fileInput.value = ""; 
+//             await loadDocuments(); 
+//         } else {
+//             alert("Failed to upload document.");
+//         }
+//     } catch (err) {
+//         console.error("Upload error:", err);
+//     } finally {
+//         btn.textContent = "Upload";
+//         btn.disabled = false;
+//     }
+// });
+
+// // 4. Chat Submission with History and SystemID
+// async function sendMessage() {
+//     const messageText = inputField.value.trim();
+//     if (messageText === "") return;
+
+//     appendMessage(messageText, 'user-msg-bubble');
+//     inputField.value = "";
+
+//     const requestData = {
+//         message: messageText,
+//         retrievalMethod: retrievalMethodDropdown.value,
+//         participantID: participantID,
+//         systemID: systemID, // Include systemID
+//         history: conversationHistory // Include the recent history
+//     };
+
+//     // Add current user message to local history
+//     conversationHistory.push({ role: "user", content: messageText });
+
+//     try {
+//         const response = await fetch('/chat', {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' },
+//             body: JSON.stringify(requestData)
+//         });
+//         const data = await response.json();
+        
+//         let botContent = `<div>Bot: "${data.botReply}"</div>`;
+        
+//         if (data.evidence && data.evidence.length > 0) {
+//             botContent += `<hr style="margin: 8px 0; border-top: 1px solid #d1d5db;">`;
+//             data.evidence.forEach((e, idx) => {
+//                 botContent += `<div style="font-size: 11px; background: #e5e7eb; padding: 4px; margin-top: 4px; border-radius: 4px;">
+//                     <strong>[E${idx + 1}]</strong> ${e.chunkText.substring(0, 80)}... <em>(Score: ${e.relevanceScore.toFixed(2)})</em>
+//                 </div>`;
+//             });
+//         }
+
+//         if (data.confidence) {
+//             botContent += `<div style="font-size: 11px; color: #6b7280; margin-top: 5px;">
+//                 System Confidence: ${(data.confidence.overallConfidence * 100).toFixed(1)}% | Method: ${data.confidence.retrievalMethod}
+//             </div>`;
+//         }
+
+//         appendHtmlMessage(botContent, 'bot-msg-bubble');
+
+//         // Add bot reply to local history and trim if necessary
+//         conversationHistory.push({ role: "assistant", content: data.botReply });
+//         if (conversationHistory.length > HISTORY_LIMIT * 2) {
+//             conversationHistory = conversationHistory.slice(-(HISTORY_LIMIT * 2));
+//         }
+
+//     } catch (error) {
+//         console.error("Error communicating with server:", error);
+//     }
+// }
+
+// sendBtn.addEventListener('click', sendMessage);
+// inputField.addEventListener('keypress', function(event) {
+//     if (event.key === 'Enter') sendMessage();
+// });
+
+// function logInteraction(eventType, elementName) {
+//     fetch('/log-event', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({ participantID, systemID, eventType, elementName }) // Send systemID with events too
+//     }).catch(err => console.error("Event log failed:", err));
+// }
+
+// inputField.addEventListener('focus', () => logInteraction('focus', 'user-input'));
+// sendBtn.addEventListener('click', () => logInteraction('click', 'send-btn'));
+// document.getElementById('upload-btn').addEventListener('click', () => logInteraction('click', 'upload-btn'));
+
+// let hoverTimer;
+// document.querySelectorAll('.panel-section, #chat-container').forEach(el => {
+//     el.addEventListener('mouseenter', (e) => {
+//         clearTimeout(hoverTimer);
+//         hoverTimer = setTimeout(() => {
+//             const elementName = e.target.id || e.target.className.split(' ')[0];
+//             logInteraction('hover', elementName);
+//         }, 500); 
+//     });
+// });
+
+
+// // ==========================================
+// // Study Workflow Page Logic
+// // ==========================================
+// const surveyBtn = document.getElementById('survey-btn');
+// const taskBtn = document.getElementById('task-btn');
+// const prototypeBtn = document.getElementById('prototype-btn');
+
+// // 1. Qualtrics Survey Button
+// if (surveyBtn) {
+//     surveyBtn.addEventListener('click', () => {
+//         fetch('/redirect-to-survey', {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' },
+//             body: JSON.stringify({ participantID })
+//         })
+//         .then(response => response.text())
+//         .then(url => {
+//             // Record the redirect event in MongoDB
+//             if (typeof logInteraction === 'function') {
+//                 logInteraction('redirect', 'Qualtrics Survey');
+//             }
+//             window.location.href = url; // Jump to survey
+//         })
+//         .catch(error => {
+//             console.error('Error redirecting to survey:', error);
+//             alert('There was an error redirecting to the survey. Please try again.');
+//         });
+//     });
+// }
+
+// // 2. Read Task Button
+// if (taskBtn) {
+//     taskBtn.addEventListener('click', () => {
+//         alert('Add your task instructions here or link this button to a task page.');
+//     });
+// }
+
+// // 3. AI Prototype Button
+// if (prototypeBtn) {
+//     prototypeBtn.addEventListener('click', () => {
+//         // Keeps the participantID and systemID in the URL to route correctly
+//         window.location.href = `/chat.html?participantID=${participantID}&systemID=${systemID}`;
+//     });
+// }
+
+// ==========================================
+// 1. Shared Variables & Initialization
+// ==========================================
 const inputField = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
 const messagesContainer = document.getElementById('messages');
 const retrievalMethodDropdown = document.getElementById('retrieval-method');
 
-// 1. Get Participant ID and System ID from URL (Fallback to localStorage)
+// Get Participant ID and System ID from URL (Fallback to localStorage)
 const urlParams = new URLSearchParams(window.location.search);
 let participantID = urlParams.get('participantID') || localStorage.getItem('participantID');
 let systemID = urlParams.get('systemID');
 
-if (!participantID) {
+if (!participantID && window.location.pathname !== '/') {
     alert("No Participant ID found. Redirecting to home page.");
     window.location.href = '/';
 }
 if (!systemID && participantID) {
-    systemID = parseInt(participantID) % 2 === 1 ? 1 : 2; // Calculate if missing
+    systemID = parseInt(participantID) % 2 === 1 ? 1 : 2; 
 }
 
-// 2. Global variable to store the last N conversation turns
+// Global variable to store the last N conversation turns
 let conversationHistory = [];
-const HISTORY_LIMIT = 5; // Store last 5 interactions
+const HISTORY_LIMIT = 5; 
 
-// Update UI to show which system is active
+// Update UI to show which system is active (Only if on chat.html)
 window.addEventListener('DOMContentLoaded', () => {
     const chatTitle = document.querySelector('#chat-container h2');
     if (chatTitle) {
@@ -28,11 +317,18 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+
+// ==========================================
+// 2. Document & History Loading (For chat.html)
+// ==========================================
 async function loadDocuments() {
     try {
+        const docsContainer = document.getElementById('uploaded-docs');
+        // DEFENSIVE CHECK: If not on chat page, stop here.
+        if (!docsContainer) return; 
+
         const res = await fetch('/documents');
         const docs = await res.json();
-        const docsContainer = document.getElementById('uploaded-docs');
         
         if (docs.length === 0) {
             docsContainer.innerHTML = '<p class="empty-state">No documents uploaded yet</p>';
@@ -49,8 +345,10 @@ async function loadDocuments() {
     }
 }
 
-// 3. Load Conversation History (Only the last N)
 async function loadConversationHistory() {
+    // DEFENSIVE CHECK: If no message container, we aren't on chat page.
+    if (!messagesContainer) return;
+
     try {
         const response = await fetch('/history', {
             method: 'POST',
@@ -82,12 +380,10 @@ async function loadConversationHistory() {
             
             appendHtmlMessage(botContent, 'bot-msg-bubble');
 
-            // Add to client-side history memory
             conversationHistory.push({ role: "user", content: interaction.userInput });
             conversationHistory.push({ role: "assistant", content: interaction.botResponse });
         });
 
-        // Ensure we only keep the last N*2 messages (user + assistant per interaction)
         if (conversationHistory.length > HISTORY_LIMIT * 2) {
             conversationHistory = conversationHistory.slice(-(HISTORY_LIMIT * 2));
         }
@@ -102,7 +398,9 @@ window.addEventListener('DOMContentLoaded', () => {
     loadConversationHistory();
 });
 
+// Helper Functions
 function appendMessage(text, className) {
+    if (!messagesContainer) return;
     const msgElement = document.createElement('div');
     msgElement.textContent = text;
     msgElement.classList.add(className);
@@ -111,6 +409,7 @@ function appendMessage(text, className) {
 }
 
 function appendHtmlMessage(htmlContent, className) {
+    if (!messagesContainer) return;
     const msgElement = document.createElement('div');
     msgElement.innerHTML = htmlContent;
     msgElement.classList.add(className);
@@ -118,43 +417,45 @@ function appendHtmlMessage(htmlContent, className) {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-document.getElementById('upload-btn').addEventListener('click', async () => {
-    const fileInput = document.getElementById('file-input');
-    if (fileInput.files.length === 0) {
-        alert("Please select a file first!");
-        return;
-    }
 
-    const formData = new FormData();
-    formData.append('file', fileInput.files[0]);
-
-    const btn = document.getElementById('upload-btn');
-    btn.textContent = "Uploading...";
-    btn.disabled = true;
-
-    try {
-        const response = await fetch('/upload-document', {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (response.ok) {
-            alert("Document uploaded and indexed successfully!");
-            fileInput.value = ""; 
-            await loadDocuments(); 
-        } else {
-            alert("Failed to upload document.");
+// ==========================================
+// 3. Chat & Upload Handlers (For chat.html)
+// ==========================================
+const uploadBtn = document.getElementById('upload-btn');
+if (uploadBtn) {
+    uploadBtn.addEventListener('click', async () => {
+        const fileInput = document.getElementById('file-input');
+        if (fileInput.files.length === 0) {
+            alert("Please select a file first!");
+            return;
         }
-    } catch (err) {
-        console.error("Upload error:", err);
-    } finally {
-        btn.textContent = "Upload";
-        btn.disabled = false;
-    }
-});
 
-// 4. Chat Submission with History and SystemID
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        uploadBtn.textContent = "Uploading...";
+        uploadBtn.disabled = true;
+
+        try {
+            const response = await fetch('/upload-document', { method: 'POST', body: formData });
+            if (response.ok) {
+                alert("Document uploaded and indexed successfully!");
+                fileInput.value = ""; 
+                await loadDocuments(); 
+            } else {
+                alert("Failed to upload document.");
+            }
+        } catch (err) {
+            console.error("Upload error:", err);
+        } finally {
+            uploadBtn.textContent = "Upload";
+            uploadBtn.disabled = false;
+        }
+    });
+}
+
 async function sendMessage() {
+    if (!inputField) return;
     const messageText = inputField.value.trim();
     if (messageText === "") return;
 
@@ -163,13 +464,12 @@ async function sendMessage() {
 
     const requestData = {
         message: messageText,
-        retrievalMethod: retrievalMethodDropdown.value,
+        retrievalMethod: retrievalMethodDropdown ? retrievalMethodDropdown.value : 'semantic',
         participantID: participantID,
-        systemID: systemID, // Include systemID
-        history: conversationHistory // Include the recent history
+        systemID: systemID,
+        history: conversationHistory 
     };
 
-    // Add current user message to local history
     conversationHistory.push({ role: "user", content: messageText });
 
     try {
@@ -199,7 +499,6 @@ async function sendMessage() {
 
         appendHtmlMessage(botContent, 'bot-msg-bubble');
 
-        // Add bot reply to local history and trim if necessary
         conversationHistory.push({ role: "assistant", content: data.botReply });
         if (conversationHistory.length > HISTORY_LIMIT * 2) {
             conversationHistory = conversationHistory.slice(-(HISTORY_LIMIT * 2));
@@ -210,30 +509,81 @@ async function sendMessage() {
     }
 }
 
-sendBtn.addEventListener('click', sendMessage);
-inputField.addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') sendMessage();
-});
+// Attach event listeners ONLY if elements exist
+if (sendBtn) {
+    sendBtn.addEventListener('click', sendMessage);
+}
+if (inputField) {
+    inputField.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') sendMessage();
+    });
+}
 
+
+// ==========================================
+// 4. Logging Events
+// ==========================================
 function logInteraction(eventType, elementName) {
     fetch('/log-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ participantID, systemID, eventType, elementName }) // Send systemID with events too
+        body: JSON.stringify({ participantID, systemID, eventType, elementName }) 
     }).catch(err => console.error("Event log failed:", err));
 }
 
-inputField.addEventListener('focus', () => logInteraction('focus', 'user-input'));
-sendBtn.addEventListener('click', () => logInteraction('click', 'send-btn'));
-document.getElementById('upload-btn').addEventListener('click', () => logInteraction('click', 'upload-btn'));
+if (inputField) inputField.addEventListener('focus', () => logInteraction('focus', 'user-input'));
+if (sendBtn) sendBtn.addEventListener('click', () => logInteraction('click', 'send-btn'));
+if (uploadBtn) uploadBtn.addEventListener('click', () => logInteraction('click', 'upload-btn'));
 
 let hoverTimer;
-document.querySelectorAll('.panel-section, #chat-container').forEach(el => {
-    el.addEventListener('mouseenter', (e) => {
-        clearTimeout(hoverTimer);
-        hoverTimer = setTimeout(() => {
-            const elementName = e.target.id || e.target.className.split(' ')[0];
-            logInteraction('hover', elementName);
-        }, 500); 
+const hoverPanels = document.querySelectorAll('.panel-section, #chat-container');
+if (hoverPanels.length > 0) {
+    hoverPanels.forEach(el => {
+        el.addEventListener('mouseenter', (e) => {
+            clearTimeout(hoverTimer);
+            hoverTimer = setTimeout(() => {
+                const elementName = e.target.id || e.target.className.split(' ')[0];
+                logInteraction('hover', elementName);
+            }, 500); 
+        });
     });
-});
+}
+
+
+// ==========================================
+// 5. Study Workflow Page Logic (For study-workflow.html)
+// ==========================================
+const surveyBtn = document.getElementById('survey-btn');
+const taskBtn = document.getElementById('task-btn');
+const prototypeBtn = document.getElementById('prototype-btn');
+
+if (surveyBtn) {
+    surveyBtn.addEventListener('click', () => {
+        fetch('/redirect-to-survey', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ participantID })
+        })
+        .then(response => response.text())
+        .then(url => {
+            logInteraction('redirect', 'Qualtrics Survey');
+            window.location.href = url; // Jump to survey
+        })
+        .catch(error => {
+            console.error('Error redirecting to survey:', error);
+            alert('There was an error redirecting to the survey. Please try again.');
+        });
+    });
+}
+
+if (taskBtn) {
+    taskBtn.addEventListener('click', () => {
+        alert('Please carefully read the provided task instructions before continuing.');
+    });
+}
+
+if (prototypeBtn) {
+    prototypeBtn.addEventListener('click', () => {
+        window.location.href = `/chat.html?participantID=${participantID}&systemID=${systemID}`;
+    });
+}

@@ -46,8 +46,7 @@
             // Determine which system the participant should see (Odd = 1, Even = 2)
             const systemID = parseInt(participantID) % 2 === 1 ? 1 : 2;
 
-            // Redirect to chat page with participantID and systemID in the URL
-            window.location.href = `/chat.html?participantID=${participantID}&systemID=${systemID}`;
+            window.location.href = `/study-workflow.html?participantID=${participantID}&systemID=${systemID}`;
         });
     </script>
 </body>
