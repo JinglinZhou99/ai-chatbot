@@ -35,19 +35,38 @@
     </div>
 
     <script>
-        document.getElementById('participant-form').addEventListener('submit', function(event) {
-            event.preventDefault();
+    document.getElementById('participant-form').addEventListener('submit', function(event) {
+        event.preventDefault();
 
-            const participantID = document.getElementById('participantID').value.trim();
+        const participantID = document.getElementById('participantID').value.trim();
 
-            // Save the Participant ID in localStorage
-            localStorage.setItem('participantID', participantID);
+        // 1. Save the Participant ID in localStorage
+        localStorage.setItem('participantID', participantID);
 
-            // Determine which system the participant should see (Odd = 1, Even = 2)
-            const systemID = parseInt(participantID) % 2 === 1 ? 1 : 2;
+        // 2. Determine which system the participant should see (Odd = 1, Even = 2)
+        const systemID = parseInt(participantID) % 2 === 1 ? 1 : 2;
 
+        // 3. Log the login event to database BEFORE redirecting
+        const btn = document.querySelector('button[type="submit"]');
+        btn.textContent = "Loading..."; 
+        btn.disabled = true;
+
+        fetch('/log-event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                participantID: participantID, 
+                systemID: systemID, 
+                eventType: 'submit', 
+                elementName: 'login-form' 
+            })
+        })
+        .catch(err => console.error("Event log failed:", err)) 
+        .finally(() => {
+            // 4. Redirect AFTER the log request finishes (or fails)
             window.location.href = `/study-workflow.html?participantID=${participantID}&systemID=${systemID}`;
         });
-    </script>
+    });
+</script>
 </body>
 </html>
